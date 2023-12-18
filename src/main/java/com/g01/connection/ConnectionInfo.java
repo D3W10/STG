@@ -1,4 +1,4 @@
-package com.g01;
+package com.g01.connection;
 
 public class ConnectionInfo {
     private final String url;
