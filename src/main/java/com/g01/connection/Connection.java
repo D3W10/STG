@@ -23,6 +23,13 @@ public abstract class Connection {
         this.fields = fields;
     }
 
+    /**
+     * Inicia uma nova conexão à base de dados
+     *
+     * @param info As informações relativas à base de dados
+     *
+     * @return Devolve {@literal true} se a conexão foi efetuada com sucesso, {@literal false} caso contrário.
+     * */
     public boolean connect(ConnectionInfo info) {
         Properties properties = new Properties();
         properties.put("user", info.getUser());
@@ -37,6 +44,11 @@ public abstract class Connection {
         }
     }
 
+    /**
+     * Fecha a conexão à base de dadps
+     *
+     * @throws SQLException se ocorreu um erro na conexão à base de dados
+     * */
     public void close() throws SQLException {
         con.close();
     }

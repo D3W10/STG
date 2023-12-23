@@ -14,6 +14,10 @@ public class SisTransegWindow {
     private JList list1;
     private JButton eliminarButton;
 
+    public SisTransegWindow() {
+
+    }
+
     public static void main(String[] args) {
         JFrame frame = new JFrame("Sistema TranSeg");
         frame.setContentPane(new SisTransegWindow().mainPanel);
