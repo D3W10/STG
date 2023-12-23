@@ -7,7 +7,10 @@ import javax.swing.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 
+import static javax.swing.JOptionPane.showConfirmDialog;
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class SisTransegWindow {
@@ -53,16 +56,20 @@ public class SisTransegWindow {
         });
 
         lctEliminarButton.addActionListener(e -> {
-            for (int index : lctTable.getSelectedRows()) {
-                try (LocalCtrlTransito lct = new LocalCtrlTransito()) {
-                    lct.connect(info);
+            if (!confirmMsg())
+                return;
 
-                    lct.delete(lctTable.getValueAt(index, 0).toString());
-                    lctTab();
-                }
-                catch (SQLException ex) {
-                    errorMsg(ex.getMessage());
-                }
+            try (LocalCtrlTransito lct = new LocalCtrlTransito()) {
+                lct.connect(info);
+
+                int len = lctTable.getSelectedRows().length - 1;
+                for (int i = len; i >= 0; i--)
+                    lct.delete(lctTable.getValueAt(lctTable.getSelectedRows()[i], 0).toString());
+
+                lctTab();
+            }
+            catch (SQLException ex) {
+                errorMsg(ex.getMessage());
             }
         });
     }
@@ -77,6 +84,10 @@ public class SisTransegWindow {
         catch (SQLException e) {
             errorMsg(e.getMessage());
         }
+    }
+
+    private boolean confirmMsg() {
+        return showConfirmDialog(null, "Tem a certeza que pretende eliminar os elementos selecionados?", "Aviso", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION;
     }
 
     private void errorMsg(String errorMsg) {
