@@ -1,14 +1,17 @@
 package com.g01;
 
+import com.g01.connection.Connection;
 import com.g01.connection.ConnectionInfo;
+import com.g01.connection.models.EventoTransito;
 import com.g01.connection.models.LocalCtrlTransito;
 
 import javax.swing.*;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.function.Supplier;
 
 import static javax.swing.JOptionPane.showConfirmDialog;
 import static javax.swing.JOptionPane.showMessageDialog;
@@ -39,6 +42,10 @@ public class SisTransegWindow {
     private JButton contraEditarButton;
     private JList<String> contraList;
     private JTable lctTable;
+    private JPanel etPanel;
+    private JButton etEliminarButton;
+    private JButton etInserirButton;
+    private JTable etTable;
 
     public SisTransegWindow() {
         info = new ConnectionInfo("sis_transeg", "postgres", "is");
@@ -47,42 +54,62 @@ public class SisTransegWindow {
             String tabTitle = tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex());
 
             if (tabTitle.equals(tabbedPanel.getTitleAt(1)))
-                lctTab();
+                tab(LocalCtrlTransito::new, lctTable);
+            else if (tabTitle.equals(tabbedPanel.getTitleAt(2)))
+                tab(EventoTransito::new, etTable);
         });
 
         lctTable.getSelectionModel().addListSelectionListener(e -> {
             lctEditarButton.setEnabled(!lctTable.getSelectionModel().isSelectionEmpty());
             lctEliminarButton.setEnabled(!lctTable.getSelectionModel().isSelectionEmpty());
         });
+        lctInserirButton.addActionListener(e -> insertAction(LocalCtrlTransito::new, lctTable));
+        lctEliminarButton.addActionListener(e -> eliminarAction(LocalCtrlTransito::new, lctTable));
 
-        lctEliminarButton.addActionListener(e -> {
-            if (!confirmMsg())
-                return;
-
-            try (LocalCtrlTransito lct = new LocalCtrlTransito()) {
-                lct.connect(info);
-
-                int len = lctTable.getSelectedRows().length - 1;
-                for (int i = len; i >= 0; i--)
-                    lct.delete(lctTable.getValueAt(lctTable.getSelectedRows()[i], 0).toString());
-
-                lctTab();
-            }
-            catch (SQLException ex) {
-                errorMsg(ex.getMessage());
-            }
-        });
+        etTable.getSelectionModel().addListSelectionListener(e -> etEliminarButton.setEnabled(!etTable.getSelectionModel().isSelectionEmpty()));
+        etInserirButton.addActionListener(e -> insertAction(EventoTransito::new, etTable));
+        etEliminarButton.addActionListener(e -> eliminarAction(EventoTransito::new, etTable));
     }
 
-    private void lctTab() {
-        try (LocalCtrlTransito lct = new LocalCtrlTransito()) {
-            lct.connect(info);
+    private <T extends Connection> void tab(Supplier<T> supT, JTable table) {
+        try (T obj = supT.get()) {
+            obj.connect(info);
 
-            ResultSet lctEntries = lct.getEntries(null);
-            lctTable.setModel(lct.getTableModel(lctEntries));
+            ResultSet lctEntries = obj.getEntries(null);
+            table.setModel(obj.getTableModel(lctEntries));
         }
         catch (SQLException e) {
             errorMsg(e.getMessage());
+        }
+    }
+
+    private <T extends Connection> void insertAction(Supplier<T> supT, JTable table) {
+        try (T obj = supT.get()) {
+            obj.connect(info);
+            obj.insertForm();
+
+            tab(supT, table);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+
+    private <T extends Connection> void eliminarAction(Supplier<T> supT, JTable table) {
+        if (!confirmMsg())
+            return;
+
+        try (T obj = supT.get()) {
+            obj.connect(info);
+
+            int len = table.getSelectedRows().length - 1;
+            for (int i = len; i >= 0; i--)
+                obj.delete(table.getValueAt(table.getSelectedRows()[i], 0).toString());
+
+            tab(supT, table);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
         }
     }
 
