@@ -11,6 +11,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static javax.swing.JOptionPane.showConfirmDialog;
@@ -64,6 +67,7 @@ public class SisTransegWindow {
             lctEliminarButton.setEnabled(!lctTable.getSelectionModel().isSelectionEmpty());
         });
         lctInserirButton.addActionListener(e -> insertAction(LocalCtrlTransito::new, lctTable));
+        lctEditarButton.addActionListener(e -> editAction(LocalCtrlTransito::new, lctTable));
         lctEliminarButton.addActionListener(e -> eliminarAction(LocalCtrlTransito::new, lctTable));
 
         etTable.getSelectionModel().addListSelectionListener(e -> etEliminarButton.setEnabled(!etTable.getSelectionModel().isSelectionEmpty()));
@@ -75,7 +79,7 @@ public class SisTransegWindow {
         try (T obj = supT.get()) {
             obj.connect(info);
 
-            ResultSet lctEntries = obj.getEntries(null);
+            ResultSet lctEntries = obj.getEntries();
             table.setModel(obj.getTableModel(lctEntries));
         }
         catch (SQLException e) {
@@ -86,9 +90,29 @@ public class SisTransegWindow {
     private <T extends Connection> void insertAction(Supplier<T> supT, JTable table) {
         try (T obj = supT.get()) {
             obj.connect(info);
-            obj.insertForm();
+            obj.form();
 
             tab(supT, table);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+
+    private <T extends Connection> void editAction(Supplier<T> supT, JTable table) {
+        try (T obj = supT.get()) {
+            obj.connect(info);
+
+            ResultSet res = obj.getEntry(table.getModel().getValueAt(table.getSelectedRow(), 0));
+            if (res.next()) {
+                List<Object> val = new ArrayList<>();
+                for (int i = 1; i <= res.getMetaData().getColumnCount(); i++)
+                    val.add(res.getString(i));
+
+                obj.form(val.toArray());
+
+                tab(supT, table);
+            }
         }
         catch (SQLException ex) {
             errorMsg(ex.getMessage());
@@ -118,7 +142,7 @@ public class SisTransegWindow {
     }
 
     private void errorMsg(String errorMsg) {
-        showMessageDialog(null, "Não foi possível conectar à base de dados:" + "\n\n" + errorMsg, "Falha na conexão", JOptionPane.ERROR_MESSAGE);
+        showMessageDialog(null, "Houve um erro ao comunicar com a base de dados:\n\n" + errorMsg, "Falha na conexão", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void main(String[] args) {
