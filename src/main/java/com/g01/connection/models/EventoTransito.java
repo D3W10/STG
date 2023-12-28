@@ -80,11 +80,15 @@ public class EventoTransito extends Connection {
         constraints.gridy = 5;
         panel.add(conditionalOptions, constraints);
 
+        JTextField coordenada = new JTextField();
+        coordenada.setBorder(new TitledBorder("Coordenada"));
+        constraints.gridy = 6;
+        panel.add(coordenada, constraints);
+
         var conditionalObj = new Object() {
             JComboBox<String> tipoMovimento = new JComboBox<>();
             JSpinner velocidadeRegistada = new JSpinner();
             JSpinner tempoSinalizacao = new JSpinner();
-            JTextField coordenada = new JTextField();
         };
 
         ActionListener onChange = e -> {
@@ -94,7 +98,7 @@ public class EventoTransito extends Connection {
             if (tipoEvento.getSelectedIndex() == 0 || tipoEvento.getSelectedIndex() == 1) {
                 conditionalObj.tipoMovimento = new JComboBox<>(new String[]{"Aproximação", "Afastamento"});
                 constraints.gridy = 0;
-                panel.add(conditionalObj.tipoMovimento, constraints);
+                conditionalOptions.add(conditionalObj.tipoMovimento, constraints);
 
                 conditionalObj.velocidadeRegistada = new JSpinner(new SpinnerNumberModel(90, 1, 200, 5));
                 conditionalObj.velocidadeRegistada.setBorder(new TitledBorder("Velocidade Registada"));
@@ -107,11 +111,6 @@ public class EventoTransito extends Connection {
                 constraints.gridy = 0;
                 conditionalOptions.add(conditionalObj.tempoSinalizacao, constraints);
             }
-
-            conditionalObj.coordenada = new JTextField();
-            conditionalObj.coordenada.setBorder(new TitledBorder("Coordenada"));
-            constraints.gridy = tipoEvento.getSelectedIndex() == 2 ? 1 : 2;
-            panel.add(conditionalObj.coordenada, constraints);
 
             conditionalOptions.revalidate();
         };
@@ -126,9 +125,61 @@ public class EventoTransito extends Connection {
                 showMessageDialog(null, "Por favor forneça um dia válido.", "Erro a inserir", JOptionPane.ERROR_MESSAGE);
             else if (hora.getText().isBlank())
                 showMessageDialog(null, "Por favor forneça uma hora válida.", "Erro a inserir", JOptionPane.ERROR_MESSAGE);
-            /*else
-                insert(evidencia.getText(), identificacao.getText(), dia.getText(), hora.getText()*//*, tipoEvento.getText()*//*);*/
+            else {
+                int id = insert(evidencia.getText(), identificacao.getText(), Date.valueOf(dia.getDate()), Time.valueOf(hora.getTime()), (String) tipoEvento.getSelectedItem());
+
+                if (tipoEvento.getSelectedIndex() == 0 || tipoEvento.getSelectedIndex() == 1)
+                    insertVelocidade(tipoEvento.getSelectedIndex(), id, (String) conditionalObj.tipoMovimento.getSelectedItem(), (Integer) conditionalObj.velocidadeRegistada.getValue(), coordenada.getText());
+                else
+                    insertSinalVermelho(id, (Integer) conditionalObj.tempoSinalizacao.getValue(), coordenada.getText());
+            }
         }
+    }
+
+    public int insert(String evidencia, String identificacao, Date dia, Time hora, String tipo) throws SQLException {
+        PreparedStatement statement = con.prepareStatement("INSERT INTO EVENTO_TRANSITO(Evidencia, Identificacao, Dia, Hora, TipoEvento, Infracao) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+
+        statement.setString(1, evidencia);
+        statement.setString(2, identificacao);
+        statement.setDate(3, dia);
+        statement.setTime(4, hora);
+        statement.setString(5, tipo);
+        statement.setNull(6, Types.INTEGER);
+        statement.executeUpdate();
+
+        ResultSet resultSet = statement.getGeneratedKeys();
+        resultSet.next();
+
+        return resultSet.getInt(1);
+    }
+
+    public void insertVelocidade(int type, int id, String tipoMovimento, int velocidadeRegistada, String coordenada) throws SQLException {
+        PreparedStatement statement = con.prepareStatement("INSERT INTO E_VELOCIDADE(TipoMovimento, VelocidadeRegistada, IdEvento) VALUES (?, ?, ?)");
+
+        statement.setString(1, tipoMovimento);
+        statement.setInt(2, velocidadeRegistada);
+        statement.setInt(3, id);
+        statement.executeUpdate();
+
+        statement = con.prepareStatement("INSERT INTO " + (type == 0 ? "E_VELOCIDADE_MED" : "E_VELOCIDADE_INST") + "(Coordenada, IdEvento) VALUES (?, ?)");
+        if (!coordenada.isBlank())
+            statement.setString(1, coordenada);
+        else
+            statement.setNull(1, Types.VARCHAR);
+        statement.setInt(2, id);
+        statement.executeUpdate();
+    }
+
+    public void insertSinalVermelho(int id, int tempoSinalizacao, String coordenada) throws SQLException {
+        PreparedStatement statement = con.prepareStatement("INSERT INTO E_SINAL_VERMELHO(TempoSinalizacao, Coordenada, IdEvento) VALUES (?, ?, ?)");
+
+        statement.setInt(1, tempoSinalizacao);
+        if (!coordenada.isBlank())
+            statement.setString(2, coordenada);
+        else
+            statement.setNull(2, Types.VARCHAR);
+        statement.setInt(3, id);
+        statement.executeUpdate();
     }
 
     @Override
