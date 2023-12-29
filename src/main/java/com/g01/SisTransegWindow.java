@@ -3,10 +3,7 @@ package com.g01;
 import com.g01.connection.Connection;
 import com.g01.connection.ConnectionInfo;
 import com.g01.connection.ConstantServe;
-import com.g01.connection.models.EventoTransito;
-import com.g01.connection.models.Infracao;
-import com.g01.connection.models.LocalCtrlTransito;
-import com.g01.connection.models.Notificacao;
+import com.g01.connection.models.*;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -34,11 +31,9 @@ public class SisTransegWindow {
     private JButton lctEditarButton;
     private JButton lctEliminarButton;
     private JButton gesEliminarButton;
-    private JButton gesInserirButton;
-    private JButton gesEditarButton;
+    private JButton gesAssociarButton;
     private JPanel homePanel;
     private JButton notiEliminarButton;
-    private JButton notiGerarButton;
     private JButton notiSegundaButton;
     private JTable lctTable;
     private JPanel etPanel;
@@ -52,6 +47,8 @@ public class SisTransegWindow {
     private JComboBox<String> infraFilter;
     private JTable notiTable;
     private JTable gesTable;
+    private JButton notiComuniButton;
+    private JButton notiPagoButton;
     //endregion
 
     public SisTransegWindow() {
@@ -66,6 +63,8 @@ public class SisTransegWindow {
                 tab(LocalCtrlTransito::new, lctTable);
             else if (tabTitle.equals(tabbedPanel.getTitleAt(2)))
                 tab(EventoTransito::new, etTable);
+            else if (tabTitle.equals(tabbedPanel.getTitleAt(3)))
+                tab(Gestao::new, gesTable);
             else if (tabTitle.equals(tabbedPanel.getTitleAt(4)))
                 tab(Notificacao::new, notiTable);
         });
@@ -82,10 +81,15 @@ public class SisTransegWindow {
         etInserirButton.addActionListener(e -> insertAction(EventoTransito::new, etTable));
         etEliminarButton.addActionListener(e -> eliminarAction(EventoTransito::new, etTable));
 
+        gesTable.getSelectionModel().addListSelectionListener(e -> {
+            gesAssociarButton.setEnabled(!gesTable.getSelectionModel().isSelectionEmpty() && gesTable.getModel().getValueAt(gesTable.getSelectedRow(), 3) == null);
+        });
+        gesAssociarButton.addActionListener(e -> associarGestao());
+
         notiTable.getSelectionModel().addListSelectionListener(e -> {
             boolean secondWay = true;
 
-            if (notiTable.getSelectedRow() != -1) {
+            if (!notiTable.getSelectionModel().isSelectionEmpty()) {
                 Integer selectedRow = (Integer) notiTable.getValueAt(notiTable.getSelectedRow(), 0);
 
                 for (int i = 0; i < notiTable.getModel().getRowCount(); i++) {
@@ -96,11 +100,14 @@ public class SisTransegWindow {
                 }
             }
 
-            notiSegundaButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty() && secondWay);
+            notiSegundaButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty() && secondWay && notiTable.getValueAt(notiTable.getSelectedRow(), 4) == null);
+            notiComuniButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty() && notiTable.getValueAt(notiTable.getSelectedRow(), 3) == null);
+            notiPagoButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty() && notiTable.getValueAt(notiTable.getSelectedRow(), 3) != null && notiTable.getValueAt(notiTable.getSelectedRow(), 4) == null);
             notiEliminarButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty());
         });
-        notiGerarButton.addActionListener(e -> insertAction(Notificacao::new, notiTable));
-        notiSegundaButton.addActionListener(e -> secondNotification());
+        notiSegundaButton.addActionListener(e -> segundaNotificacao());
+        notiComuniButton.addActionListener(e -> comunicarNotificacao());
+        notiPagoButton.addActionListener(e -> pagarNotificacao());
         notiEliminarButton.addActionListener(e -> eliminarNotificacao());
 
         infraProcurar.addActionListener(e -> searchOffenses());
@@ -170,11 +177,51 @@ public class SisTransegWindow {
     }
     //endregion
 
+    //region Gestão
+
+    private void associarGestao() {
+        try (Gestao obj = new Gestao()) {
+            obj.connect(info);
+            obj.form(gesTable.getModel().getValueAt(gesTable.getSelectedRow(), 0));
+
+            tab(Gestao::new, gesTable);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+
+    //endregion
+
     //region Notificação
-    private void secondNotification() {
+    private void segundaNotificacao() {
         try (Notificacao obj = new Notificacao()) {
             obj.connect(info);
-            obj.secondForm((Integer) notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 0));
+            obj.form(notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 0));
+
+            tab(Notificacao::new, notiTable);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+
+    private void comunicarNotificacao() {
+        try (Notificacao obj = new Notificacao()) {
+            obj.connect(info);
+            obj.formComunicacao((Integer) notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 0), (Integer) notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 1));
+
+            tab(Notificacao::new, notiTable);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+
+    private void pagarNotificacao() {
+        try (Notificacao obj = new Notificacao()) {
+            obj.connect(info);
+            obj.pay((Integer) notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 0), (Integer) notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 1));
 
             tab(Notificacao::new, notiTable);
         }
