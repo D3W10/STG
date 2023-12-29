@@ -1,6 +1,7 @@
 package com.g01.connection.models;
 
 import com.g01.connection.Connection;
+import com.g01.connection.ConstantServe;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.TimePicker;
 
@@ -9,7 +10,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.sql.*;
-import java.time.LocalDate;
 
 import static javax.swing.JOptionPane.*;
 
@@ -62,12 +62,12 @@ public class EventoTransito extends Connection {
         constraints.gridy = 1;
         panel.add(identificacao, constraints);
 
-        DatePicker dia = new DatePicker(DP_SETTINGS);
+        DatePicker dia = new DatePicker(ConstantServe.getDatePickerSettings());
         dia.setBorder(new TitledBorder("Dia"));
         constraints.gridy = 2;
         panel.add(dia, constraints);
 
-        TimePicker hora = new TimePicker(TP_SETTINGS);
+        TimePicker hora = new TimePicker(ConstantServe.getTimePickerSettings());
         hora.setBorder(new TitledBorder("Hora"));
         constraints.gridy = 3;
         panel.add(hora, constraints);

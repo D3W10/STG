@@ -2,16 +2,16 @@ package com.g01;
 
 import com.g01.connection.Connection;
 import com.g01.connection.ConnectionInfo;
+import com.g01.connection.ConstantServe;
 import com.g01.connection.models.EventoTransito;
+import com.g01.connection.models.Infracao;
 import com.g01.connection.models.LocalCtrlTransito;
+import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -22,11 +22,12 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class SisTransegWindow {
     private final ConnectionInfo info;
 
+    //region Components
     private JTabbedPane tabbedPanel;
     private JPanel lctPanel;
     private JPanel gerenPanel;
     private JPanel notiPanel;
-    private JPanel contraPanel;
+    private JPanel infraPanel;
     private JPanel mainPanel;
     private JButton lctInserirButton;
     private JButton lctEditarButton;
@@ -40,18 +41,22 @@ public class SisTransegWindow {
     private JButton notiInserirButton;
     private JButton notiEditarButton;
     private JList<String> notiList;
-    private JButton contraEliminarButton;
-    private JButton contraInserirButton;
-    private JButton contraEditarButton;
-    private JList<String> contraList;
     private JTable lctTable;
     private JPanel etPanel;
     private JButton etEliminarButton;
     private JButton etInserirButton;
     private JTable etTable;
+    private DatePicker infraStart;
+    private DatePicker infraEnd;
+    private JButton infraProcurar;
+    private JTable infraTable;
+    private JComboBox infraFilter;
+    //endregion
 
     public SisTransegWindow() {
         info = new ConnectionInfo("sis_transeg", "postgres", "is");
+        infraStart.setSettings(ConstantServe.getDatePickerSettings());
+        infraEnd.setSettings(ConstantServe.getDatePickerSettings());
 
         tabbedPanel.addChangeListener(e -> {
             String tabTitle = tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex());
@@ -73,8 +78,11 @@ public class SisTransegWindow {
         etTable.getSelectionModel().addListSelectionListener(e -> etEliminarButton.setEnabled(!etTable.getSelectionModel().isSelectionEmpty()));
         etInserirButton.addActionListener(e -> insertAction(EventoTransito::new, etTable));
         etEliminarButton.addActionListener(e -> eliminarAction(EventoTransito::new, etTable));
+
+        infraProcurar.addActionListener(e -> searchOffenses());
     }
 
+    //region CRUD
     private <T extends Connection> void tab(Supplier<T> supT, JTable table) {
         try (T obj = supT.get()) {
             obj.connect(info);
@@ -134,6 +142,19 @@ public class SisTransegWindow {
         }
         catch (SQLException ex) {
             errorMsg(ex.getMessage());
+        }
+    }
+    //endregion
+
+    private void searchOffenses() {
+        try (Infracao inf = new Infracao(infraStart.getDate(), infraEnd.getDate(), infraFilter.getSelectedIndex())) {
+            inf.connect(info);
+
+            ResultSet resultSet = inf.getEntries();
+            infraTable.setModel(inf.getTableModel(resultSet));
+        }
+        catch (SQLException e) {
+            errorMsg(e.getMessage());
         }
     }
 

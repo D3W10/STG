@@ -1,6 +1,7 @@
 package com.g01.connection.models;
 
 import com.g01.connection.Connection;
+import com.g01.connection.ConstantServe;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -65,7 +66,7 @@ public class LocalCtrlTransito extends Connection {
         constraints.gridy = 1;
         panel.add(tipoLocal, constraints);
 
-        DatePicker dataInstalacao = new DatePicker(DP_SETTINGS);
+        DatePicker dataInstalacao = new DatePicker(ConstantServe.getDatePickerSettings());
         dataInstalacao.setBorder(new TitledBorder("Data de Instalação"));
         if (defaults.length > 2)
             dataInstalacao.setDate(LocalDate.parse((String) defaults[2]));

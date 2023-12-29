@@ -1,39 +1,15 @@
 package com.g01.connection;
 
-import com.github.lgooddatepicker.components.DatePickerSettings;
-import com.github.lgooddatepicker.components.TimePickerSettings;
-import com.github.lgooddatepicker.zinternaltools.HighlightInformation;
-
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.time.format.TextStyle;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Vector;
 
 public abstract class Connection implements AutoCloseable {
     protected java.sql.Connection con;
-
-    protected final DatePickerSettings DP_SETTINGS = new DatePickerSettings();
-
-    protected final TimePickerSettings TP_SETTINGS = new TimePickerSettings();
-
-    public Connection() {
-        DP_SETTINGS.setSizeDatePanelMinimumHeight(200);
-        DP_SETTINGS.setFormatForDatesCommonEra("dd/MM/yyyy");
-        DP_SETTINGS.setHighlightPolicy(localDate -> {
-            String dotw = localDate.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            boolean isWeekend = dotw.equals("Sat") || dotw.equals("Sun");
-
-            return new HighlightInformation(isWeekend ? new Color(230, 230, 230) : new Color(255, 255, 255));
-        });
-        TP_SETTINGS.setFormatForDisplayTime("hh:mm");
-        TP_SETTINGS.use24HourClockFormat();
-    }
 
     /**
      * Inicia uma nova conexão à base de dados.
