@@ -6,6 +6,7 @@ import com.g01.connection.ConstantServe;
 import com.g01.connection.models.EventoTransito;
 import com.g01.connection.models.Infracao;
 import com.g01.connection.models.LocalCtrlTransito;
+import com.g01.connection.models.Notificacao;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static javax.swing.JOptionPane.showConfirmDialog;
@@ -40,7 +42,6 @@ public class SisTransegWindow {
     private JButton notiEliminarButton;
     private JButton notiGerarButton;
     private JButton notiSegundaButton;
-    private JList<String> notiList;
     private JTable lctTable;
     private JPanel etPanel;
     private JButton etEliminarButton;
@@ -50,7 +51,8 @@ public class SisTransegWindow {
     private DatePicker infraEnd;
     private JButton infraProcurar;
     private JTable infraTable;
-    private JComboBox infraFilter;
+    private JComboBox<String> infraFilter;
+    private JTable notiTable;
     //endregion
 
     public SisTransegWindow() {
@@ -65,6 +67,8 @@ public class SisTransegWindow {
                 tab(LocalCtrlTransito::new, lctTable);
             else if (tabTitle.equals(tabbedPanel.getTitleAt(2)))
                 tab(EventoTransito::new, etTable);
+            else if (tabTitle.equals(tabbedPanel.getTitleAt(4)))
+                tab(Notificacao::new, notiTable);
         });
 
         lctTable.getSelectionModel().addListSelectionListener(e -> {
@@ -78,6 +82,27 @@ public class SisTransegWindow {
         etTable.getSelectionModel().addListSelectionListener(e -> etEliminarButton.setEnabled(!etTable.getSelectionModel().isSelectionEmpty()));
         etInserirButton.addActionListener(e -> insertAction(EventoTransito::new, etTable));
         etEliminarButton.addActionListener(e -> eliminarAction(EventoTransito::new, etTable));
+
+        notiTable.getSelectionModel().addListSelectionListener(e -> {
+            boolean secondWay = true;
+
+            if (notiTable.getSelectedRow() != -1) {
+                Integer selectedRow = (Integer) notiTable.getValueAt(notiTable.getSelectedRow(), 0);
+
+                for (int i = 0; i < notiTable.getModel().getRowCount(); i++) {
+                    if (notiTable.getModel().getValueAt(i, 0).equals(selectedRow) && notiTable.getSelectedRow() != i) {
+                        secondWay = false;
+                        break;
+                    }
+                }
+            }
+
+            notiSegundaButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty() && secondWay);
+            notiEliminarButton.setEnabled(!notiTable.getSelectionModel().isSelectionEmpty());
+        });
+        notiGerarButton.addActionListener(e -> insertAction(Notificacao::new, notiTable));
+        notiSegundaButton.addActionListener(e -> secondNotification());
+        notiEliminarButton.addActionListener(e -> eliminarNotificacao());
 
         infraProcurar.addActionListener(e -> searchOffenses());
     }
@@ -139,6 +164,38 @@ public class SisTransegWindow {
                 obj.delete(table.getValueAt(table.getSelectedRows()[i], 0).toString());
 
             tab(supT, table);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+    //endregion
+
+    //region Notificação
+    private void secondNotification() {
+        try (Notificacao obj = new Notificacao()) {
+            obj.connect(info);
+            obj.secondForm((Integer) notiTable.getModel().getValueAt(notiTable.getSelectedRow(), 0));
+
+            tab(Notificacao::new, notiTable);
+        }
+        catch (SQLException ex) {
+            errorMsg(ex.getMessage());
+        }
+    }
+
+    private void eliminarNotificacao() {
+        if (!confirmMsg())
+            return;
+
+        try (Notificacao obj = new Notificacao()) {
+            obj.connect(info);
+
+            int len = notiTable.getSelectedRows().length - 1;
+            for (int i = len; i >= 0; i--)
+                obj.deleteNoti(notiTable.getValueAt(notiTable.getSelectedRows()[i], 0).toString(), notiTable.getValueAt(notiTable.getSelectedRows()[i], 1).toString());
+
+            tab(Notificacao::new, notiTable);
         }
         catch (SQLException ex) {
             errorMsg(ex.getMessage());
