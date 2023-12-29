@@ -20,9 +20,9 @@ public class LocalCtrlTransito extends Connection {
 
         statement.setString(1, (String) id);
 
-        ResultSet sa = statement.executeQuery();
-        if (sa.next()) {
-            String tipo = sa.getString("TipoLocal");
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            String tipo = resultSet.getString("TipoLocal");
 
             if (tipo.equals("Velocidade Média"))
                 statement = con.prepareStatement("SELECT LOCAL_CTRL_TRANSITO.CoordGeografica, TipoLocal, DataInstalacao, Comarca, Rodovia, Quilometro, VelocidadeLimite, ErroVelocidade, CoordenadaEntrada, CoordenadaSaida FROM LOCAL_CTRL_TRANSITO INNER JOIN L_VELOCIDADE ON LOCAL_CTRL_TRANSITO.CoordGeografica = L_VELOCIDADE.CoordGeografica INNER JOIN L_VELOCIDADE_MEDIA ON LOCAL_CTRL_TRANSITO.coordgeografica = L_VELOCIDADE_MEDIA.coordgeografica WHERE LOCAL_CTRL_TRANSITO.CoordGeografica = ?");

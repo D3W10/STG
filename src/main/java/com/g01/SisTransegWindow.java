@@ -38,8 +38,8 @@ public class SisTransegWindow {
     private JList<String> gerenList;
     private JPanel homePanel;
     private JButton notiEliminarButton;
-    private JButton notiInserirButton;
-    private JButton notiEditarButton;
+    private JButton notiGerarButton;
+    private JButton notiSegundaButton;
     private JList<String> notiList;
     private JTable lctTable;
     private JPanel etPanel;

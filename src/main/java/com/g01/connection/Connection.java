@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Vector;
 
 public abstract class Connection implements AutoCloseable {
@@ -19,11 +18,7 @@ public abstract class Connection implements AutoCloseable {
      * @throws SQLException se ocorreu um erro na conexão à base de dados
      * */
     public void connect(ConnectionInfo info) throws SQLException {
-        Properties properties = new Properties();
-        properties.put("user", info.getUser());
-        properties.put("password", info.getPassword());
-
-        con = DriverManager.getConnection(info.getUrl(), properties);
+        con = DriverManager.getConnection(info.getUrl(), info.getUser(), info.getPassword());
     }
 
     /**
