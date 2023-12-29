@@ -22,7 +22,7 @@
           <grid id="a42be" binding="homePanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <tabbedpane title="Home"/>
+              <tabbedpane title="Início"/>
             </constraints>
             <properties>
               <name value=""/>
@@ -148,10 +148,10 @@
               </hspacer>
             </children>
           </grid>
-          <grid id="f6f30" binding="gerenPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="f6f30" binding="gesPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <tabbedpane title="Gerenciar"/>
+              <tabbedpane title="Gestão"/>
             </constraints>
             <properties/>
             <border type="none"/>
@@ -164,7 +164,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="b30d" class="javax.swing.JButton" binding="gerenEliminarButton">
+                  <component id="b30d" class="javax.swing.JButton" binding="gesEliminarButton">
                     <constraints>
                       <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -172,7 +172,7 @@
                       <text value="Eliminar"/>
                     </properties>
                   </component>
-                  <component id="22d25" class="javax.swing.JButton" binding="gerenInserirButton">
+                  <component id="22d25" class="javax.swing.JButton" binding="gesInserirButton">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -180,7 +180,7 @@
                       <text value="Inserir"/>
                     </properties>
                   </component>
-                  <component id="ad0ba" class="javax.swing.JButton" binding="gerenEditarButton">
+                  <component id="ad0ba" class="javax.swing.JButton" binding="gesEditarButton">
                     <constraints>
                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -200,7 +200,7 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="bfaa9" class="javax.swing.JList" binding="gerenList">
+                      <component id="4a9cd" class="javax.swing.JTable" binding="gesTable">
                         <constraints/>
                         <properties/>
                       </component>

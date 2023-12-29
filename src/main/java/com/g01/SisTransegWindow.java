@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import static javax.swing.JOptionPane.showConfirmDialog;
@@ -27,17 +26,16 @@ public class SisTransegWindow {
     //region Components
     private JTabbedPane tabbedPanel;
     private JPanel lctPanel;
-    private JPanel gerenPanel;
+    private JPanel gesPanel;
     private JPanel notiPanel;
     private JPanel infraPanel;
     private JPanel mainPanel;
     private JButton lctInserirButton;
     private JButton lctEditarButton;
     private JButton lctEliminarButton;
-    private JButton gerenEliminarButton;
-    private JButton gerenInserirButton;
-    private JButton gerenEditarButton;
-    private JList<String> gerenList;
+    private JButton gesEliminarButton;
+    private JButton gesInserirButton;
+    private JButton gesEditarButton;
     private JPanel homePanel;
     private JButton notiEliminarButton;
     private JButton notiGerarButton;
@@ -53,6 +51,7 @@ public class SisTransegWindow {
     private JTable infraTable;
     private JComboBox<String> infraFilter;
     private JTable notiTable;
+    private JTable gesTable;
     //endregion
 
     public SisTransegWindow() {
@@ -228,6 +227,7 @@ public class SisTransegWindow {
         frame.setContentPane(new SisTransegWindow().mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(640, 480);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 }
