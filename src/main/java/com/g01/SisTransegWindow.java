@@ -7,7 +7,6 @@ import com.g01.connection.models.*;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,7 +21,9 @@ public class SisTransegWindow {
 
     //region Components
     private JTabbedPane tabbedPanel;
+    private JPanel homePanel;
     private JPanel lctPanel;
+    private JPanel etPanel;
     private JPanel gesPanel;
     private JPanel notiPanel;
     private JPanel infraPanel;
@@ -30,13 +31,10 @@ public class SisTransegWindow {
     private JButton lctInserirButton;
     private JButton lctEditarButton;
     private JButton lctEliminarButton;
-    private JButton gesEliminarButton;
     private JButton gesAssociarButton;
-    private JPanel homePanel;
     private JButton notiEliminarButton;
     private JButton notiSegundaButton;
     private JTable lctTable;
-    private JPanel etPanel;
     private JButton etEliminarButton;
     private JButton etInserirButton;
     private JTable etTable;
@@ -81,9 +79,7 @@ public class SisTransegWindow {
         etInserirButton.addActionListener(e -> insertAction(EventoTransito::new, etTable));
         etEliminarButton.addActionListener(e -> eliminarAction(EventoTransito::new, etTable));
 
-        gesTable.getSelectionModel().addListSelectionListener(e -> {
-            gesAssociarButton.setEnabled(!gesTable.getSelectionModel().isSelectionEmpty() && gesTable.getModel().getValueAt(gesTable.getSelectedRow(), 3) == null);
-        });
+        gesTable.getSelectionModel().addListSelectionListener(e -> gesAssociarButton.setEnabled(!gesTable.getSelectionModel().isSelectionEmpty() && gesTable.getModel().getValueAt(gesTable.getSelectedRow(), 3) == null));
         gesAssociarButton.addActionListener(e -> associarGestao());
 
         notiTable.getSelectionModel().addListSelectionListener(e -> {
