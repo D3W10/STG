@@ -32,6 +32,15 @@ public abstract class Connection implements AutoCloseable {
             con.close();
     }
 
+    /**
+     * Cria um {@link DefaultTableModel} com as colunas e dados de um {@link ResultSet}
+     *
+     * @param resultSet a lista de resultados a converter
+     *
+     * @return um modelo para ser usado num {@link javax.swing.JTable}
+     *
+     * @throws SQLException se ocorreu um erro na conexão à base de dados
+     */
     public DefaultTableModel getTableModel(ResultSet resultSet) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         Vector<String> columns = new Vector<>();
@@ -52,10 +61,33 @@ public abstract class Connection implements AutoCloseable {
         return new DefaultTableModel(data, columns);
     }
 
+    /**
+     * Obtém o tuplo com o id associado
+     *
+     * @param id o id to tuplo
+     *
+     * @return a informação total do tuplo
+     *
+     * @throws SQLException se ocorreu um erro na conexão à base de dados
+     */
     public abstract ResultSet getEntry(Object id) throws SQLException;
 
+    /**
+     * Obtém todos os tuplos de uma tabela ou um conjunto de tabelas
+     *
+     * @return a informação da base de dados
+     *
+     * @throws SQLException se ocorreu um erro na conexão à base de dados
+     */
     public abstract ResultSet getEntries() throws SQLException;
 
+    /**
+     * Apresenta ao utilizador uma janela com os devidos campos a preencher (procedendo à sua inserção ou edição)
+     *
+     * @param defaults os valores por padrão a serem preenchidos
+     *
+     * @throws SQLException se ocorreu um erro na conexão à base de dados
+     */
     public abstract void form(Object... defaults) throws SQLException;
 
     /**
